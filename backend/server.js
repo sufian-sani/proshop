@@ -30,6 +30,12 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 
+// app.get('/api/config/sslcommerce', (req, res) => {
+//     res.send({
+//         clientId: process.env.SSLCOMMERCE_CLIENT_ID,
+//     });
+// });
+
 app.use(notFound)
 app.use(errorHandler)
 
