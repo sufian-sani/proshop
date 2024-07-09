@@ -2,7 +2,11 @@ import { Link, useParams } from 'react-router-dom'
 import { Row, Col, ListGroup, Image, Form, Button, Card } from 'react-bootstrap';
 import Message from "../components/Message";
 import Loader from "../components/Loader";
-import { useGetOrderDetailsQuery } from "../slices/ordersApiSlice";
+import { useGetOrderDetailsQuery, usePayOrderMutation } from "../slices/ordersApiSlice";
+import {useState} from "react";
+import {useSelector} from "react-redux";
+import {isPending} from "@reduxjs/toolkit";
+import {toast} from "react-toastify";
 
 
 const OrderScreen = () => {
@@ -14,6 +18,20 @@ const OrderScreen = () => {
         isLoading,
         error,
     } = useGetOrderDetailsQuery(orderId)
+
+    const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
+
+    const { userInfo } = useSelector((state) => state.auth);
+
+    async function onApproveTest(){
+        await payOrder({orderId, details: {payer: {
+            id: userInfo.id,
+            status: true,
+            update_time: Date.now()
+        }}})
+        refetch();
+        toast.success("Payment Successful");
+    }
 
     return isLoading ? <Loader /> : error ? <Message variant='danger' /> : (
         <>
@@ -104,6 +122,16 @@ const OrderScreen = () => {
                                     <Col>${order.totalPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
+                            { !order.isPaid && (
+                                <ListGroup.Item>
+                                    {loadingPay && <Loader/>}
+
+                                    <div>
+                                        <Button onClick={onApproveTest} style={{marginBottom:'10px'}}>Test Pay Order</Button>
+                                    </div>
+
+                                </ListGroup.Item>
+                            )}
                         </ListGroup>
                     </Card>
                 </Col>
